@@ -1,0 +1,69 @@
+---
+title: "NetEase Cloud Music lyric provider"
+description: "The Netease provider searches NetEase Cloud Music for lyrics when no player-specific provider succeeds. Configure search pattern, timeout, and retries."
+---
+
+The `Netease` provider is the last resort in Lyrica's provider chain. It searches NetEase Cloud Music using the current song's title and artist — or title alone, depending on your configuration — fetches the synchronized LRC lyrics for the best match, and optionally includes translated lyrics if available. Because it requires no player-specific integration, it works with any MPRIS2-compatible player that exposes song metadata.
+
+## How it works
+
+When the `Netease` provider runs, it:
+
+1. Reads the song title and artist from MPRIS2 metadata.
+2. Sends a search query to the NetEase Cloud Music API.
+3. Picks the best match from the results.
+4. Downloads the synchronized LRC lyric data for that track.
+
+If translated lyrics are available on NetEase for the matched track, Lyrica fetches and displays them alongside the primary lyrics.
+
+## Configuration
+
+All `Netease` provider settings are in the **Backend** tab of the widget settings. See [Backend settings](/configuration/backend) for the full reference.
+
+<AccordionGroup>
+  <Accordion title="Online search pattern" defaultOpen={false}>
+    **Config key:** `onlineSearchPattern` · **Default:** `0`
+
+    Controls how Lyrica queries NetEase.
+
+    | Value | Behavior |
+    |-------|----------|
+    | `0` | Search by title + artist (more accurate, default) |
+    | `1` | Search by title only |
+
+    Use `1` if the artist name in your player's metadata causes mismatches — for example, if the artist name uses a romanization or alternate spelling that NetEase doesn't recognize.
+  </Accordion>
+
+  <Accordion title="Online search timeout" defaultOpen={false}>
+    **Config key:** `onlineSearchTimeout` · **Default:** `10`
+
+    The number of seconds to wait for a response from the NetEase API before giving up. Increase this value if you have a slow or unreliable internet connection.
+  </Accordion>
+
+  <Accordion title="Online search retry" defaultOpen={false}>
+    **Config key:** `onlineSearchRetry` · **Default:** `true`
+
+    When enabled, Lyrica retries the search if a request fails. Disable this if you want Lyrica to give up immediately on failure rather than waiting for retries.
+  </Accordion>
+
+  <Accordion title="Online search max retries" defaultOpen={false}>
+    **Config key:** `onlineSearchMaxRetries` · **Default:** `3`
+
+    The maximum number of retry attempts when a request fails. Only applies when `onlineSearchRetry` is enabled.
+  </Accordion>
+</AccordionGroup>
+
+## When to use the Netease provider
+
+The `Netease` provider works best as a fallback for local music or players that don't have a dedicated Lyrica integration. It's most accurate when:
+
+- The song's title and artist in your player metadata match how the track is catalogued on NetEase Cloud Music.
+- The track exists in NetEase's library (which is extensive but not universal).
+
+<Tip>
+  If `Netease` consistently finds the wrong lyrics for a particular artist, try setting `onlineSearchPattern` to `1` (title only). This helps when your metadata uses artist name formats that NetEase doesn't recognize — for example, alternate romanizations or group name variants.
+</Tip>
+
+<Warning>
+  `Netease` is the last provider in the default chain. It only runs if every other enabled provider fails to find lyrics. If you remove all other providers, `Netease` becomes the first and only provider tried.
+</Warning>

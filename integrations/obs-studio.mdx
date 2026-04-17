@@ -1,0 +1,61 @@
+---
+title: "Display lyrics in OBS Studio with Lyrica"
+description: "Use the Lyrica OBS Python plugin to display synchronized lyrics as a text overlay in your OBS Studio scenes, with configurable update interval."
+---
+
+Lyrica includes an OBS Studio Python script plugin that subscribes to the Lyrica WebSocket and updates a designated OBS text source with the current song and lyric line. Once loaded, the plugin runs in a background thread and pushes updates automatically — no manual refresh needed.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- Lyrica running with the backend daemon active
+- OBS Studio installed with Python scripting enabled (OBS 28+ on Linux supports Python 3.x scripts natively)
+- The `websockets` Python package installed: `pip install websockets`
+
+## Set up the plugin
+
+<Steps>
+  <Step title="Open the Scripts dialog">
+    In OBS Studio, click **Tools** in the menu bar, then select **Scripts**.
+  </Step>
+
+  <Step title="Add the plugin script">
+    Click **+** at the bottom of the Scripts dialog and navigate to `frontend/obs_studio/lyrica_obs_plugin.py` inside the Lyrica source directory. Select the file and click **Open**.
+  </Step>
+
+  <Step title="Create a text source (if you don't have one)">
+    If you don't already have a text source in your scene, add one first. In your scene, click **Sources** → **+** → **Text (FreeType 2)** (recommended on Linux) or **Text (GDI+)**. Give it a name you'll recognise, such as `Lyrics`.
+  </Step>
+
+  <Step title="Configure the script settings">
+    With `lyrica_obs_plugin.py` selected in the Scripts list, configure the settings on the right:
+
+    - **Text Source** — enter the name of the text source you want the plugin to update (for example, `Lyrics`)
+    - **Websocket Port** — set the port Lyrica is listening on (default: `15650`)
+    - **Update Interval** — how often the text source refreshes, in milliseconds (default: `1000`)
+  </Step>
+
+  <Step title="Apply and reload">
+    Click **Reload** to start the script. The plugin will connect to `ws://127.0.0.1:15650/ws` and begin updating your text source immediately.
+  </Step>
+</Steps>
+
+## Output format
+
+Once running, your text source will display:
+
+```text
+Now Playing: Artist - Song Title
+Current lyric line text
+```
+
+The first line updates when the song changes. The second line updates as the lyrics progress through the track.
+
+<Tip>
+  Set the **Update Interval** to `200` milliseconds for more responsive lyric updates. Lower values give smoother transitions at the cost of slightly more CPU usage.
+</Tip>
+
+<Note>
+  The included plugin is an example implementation — it writes to a single text source and does not apply any custom formatting or styling. You can open `frontend/obs_studio/lyrica_obs_plugin.py` and modify it to match your scene layout, use separate sources for the song info and lyric line, or add your own styling logic.
+</Note>

@@ -1,97 +1,61 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Lyrica: desktop lyrics for KDE Plasma"
+description: "Lyrica displays real-time song lyrics directly on your KDE Plasma panel, integrating seamlessly with local and online music players."
 ---
 
-## Setting up
+Lyrica is a lightweight Linux desktop lyrics widget that shows synchronized lyrics on your KDE Plasma taskbar. It connects to your music player via MPRIS2, reads local LRC files, or fetches lyrics from NetEase Cloud Music — all with minimal setup and native desktop integration.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Build and install Lyrica on your KDE Plasma 6 desktop in minutes
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get lyrics showing on your panel after your first install
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Lyric Providers" icon="music" href="/lyric-providers/overview">
+    Choose how Lyrica fetches lyrics for your music player
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Configuration" icon="sliders" href="/configuration/overview">
+    Customize appearance, font, color, and backend settings
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## How it works
 
-Everything you need to create world-class documentation.
+Lyrica runs a small Rust backend daemon that monitors your music player via the MPRIS2 D-Bus interface. When a song plays, it tries each enabled lyric provider in order until it finds lyrics, then streams synchronized lines to the KDE Plasma plasmoid over a local WebSocket connection.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+<Steps>
+  <Step title="Build and install the plasmoid">
+    Clone the repository, install dependencies for your distro, and run the build script to produce a `.plasmoid` package.
+  </Step>
+  <Step title="Add the widget to your panel">
+    Use `kpackagetool6` to install the plasmoid, then add the **Lyrica** widget to your KDE Plasma panel from the widget picker.
+  </Step>
+  <Step title="Play music">
+    Start any MPRIS2-compatible player. Lyrica automatically detects the song and displays synchronized lyrics on your panel.
+  </Step>
+  <Step title="Tune to your taste">
+    Open the widget settings to choose lyric providers, adjust font size and color, enable translated lyrics, and more.
+  </Step>
+</Steps>
 
-## Need inspiration?
+## Key features
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Multiple lyric sources" icon="layer-group" href="/lyric-providers/overview">
+    MPRIS2 metadata, local LRC files, and NetEase Cloud Music — tried in order, with fallback
+  </Card>
+  <Card title="Translated lyrics" icon="language" href="/configuration/appearance">
+    Show original, translated, romanized, or side-by-side lyrics depending on your preference
+  </Card>
+  <Card title="WebSocket API" icon="plug" href="/integrations/websocket-api">
+    Build custom frontends or integrate with other tools using the local WebSocket API
+  </Card>
+  <Card title="OBS Studio support" icon="video" href="/integrations/obs-studio">
+    Display lyrics as a text overlay in your OBS scenes using the included Python plugin
+  </Card>
+</CardGroup>
+
+<Note>
+  Lyrica requires **KDE Plasma 6.0 or later**. It does not support Flatpak/Snap desktops or NixOS due to relative path constraints.
+</Note>

@@ -1,0 +1,53 @@
+---
+title: "MPRIS2-based lyric providers"
+description: "Covers the Mpris2Text, NeteaseTrackID, YesPlayMusic, SPlayer, and FeelUOwnNetease providers that integrate with specific MPRIS2-compatible players."
+---
+
+Several Lyrica providers integrate with specific music players — either by reading data from MPRIS2 metadata or by querying a local API that the player exposes. Because these providers work with information the player already has, they don't need to search for the right track online, making them more reliable than the generic `Netease` fallback for their respective players.
+
+## Mpris2Text
+
+The `Mpris2Text` provider works with players that embed timeline-synced lyrics directly in their MPRIS2 metadata, specifically in the `mpris:asText` field. When available, this is the cleanest possible integration: lyrics come straight from the player with no lookup step.
+
+In practice, very few players currently expose lyrics this way. If you're not using a player that explicitly supports `mpris:asText`, this provider will simply return nothing and Lyrica moves on to the next one.
+
+<Info>
+  Compatible players are any that populate the `mpris:asText` metadata field with timestamped lyric text. Check your player's documentation or release notes to see if it supports this.
+</Info>
+
+## NeteaseTrackID
+
+The `NeteaseTrackID` provider works with third-party NetEase Cloud Music players that expose the current track's ID in their MPRIS2 metadata via the `mpris:trackid` field. Lyrica reads the ID directly and fetches the corresponding lyrics from NetEase without any search step.
+
+Compatible players include:
+
+- **ElectronNCM** — an Electron-based NetEase Cloud Music client
+- **NetEase Cloud Music GTK4** — a GTK4-based third-party client
+
+Because the track ID uniquely identifies the song on NetEase, this provider is significantly more accurate than searching by title and artist.
+
+## YesPlayMusic
+
+The `YesPlayMusic` provider integrates with [YesPlayMusic](https://github.com/qier222/YesPlayMusic), a third-party NetEase Cloud Music desktop player. When YesPlayMusic is running, it exposes a local HTTP API. Lyrica queries this API to get the current track's lyrics directly, without performing any online search.
+
+<Note>
+  This provider only works when YesPlayMusic is the active player. If you use another player at the same time, Lyrica targets whichever one is currently playing.
+</Note>
+
+## SPlayer
+
+The `SPlayer` provider works similarly to `YesPlayMusic`. [SPlayer](https://github.com/imsyy/SPlayer) is another third-party NetEase Cloud Music player that exposes a local API. Lyrica queries SPlayer's local API to retrieve lyrics for the current track.
+
+## FeelUOwnNetease
+
+The `FeelUOwnNetease` provider works with [FeelUOwn](https://github.com/feeluown/FeelUOwn), a local and online music player written in Python, when you're listening to NetEase Cloud Music songs through its `feeluown-netease` plugin.
+
+<Tip>
+  If you use FeelUOwn with other music sources (like local files or Spotify), consider keeping the `File` or `Netease` providers enabled as fallbacks for non-NetEase tracks.
+</Tip>
+
+## Choosing between providers
+
+If you use one of these players, enabling its dedicated provider and placing it early in your provider list gives you more accurate results than relying on the generic `Netease` search. The recommended approach is to keep all relevant providers enabled in their default order — Lyrica tries them in sequence and stops at the first success.
+
+See [Lyric providers overview](/lyric-providers/overview) for how to reorder or disable providers in the widget settings.

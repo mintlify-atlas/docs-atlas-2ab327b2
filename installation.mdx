@@ -1,0 +1,105 @@
+---
+title: "Install Lyrica on KDE Plasma 6"
+description: "Step-by-step build and install instructions for Lyrica on Debian, Ubuntu, Arch Linux, Fedora, and openSUSE with KDE Plasma 6. Requires Rust and Qt6."
+---
+
+Lyrica is distributed as source code. You build it locally using a short shell script that compiles the Rust daemon and packages the QML plasmoid into a `.plasmoid` file, then install it with `kpackagetool6`. The steps below walk you through the full process on each supported distribution.
+
+<Warning>
+  Lyrica does not support Flatpak or Snap desktop environments, or NixOS. If your KDE Plasma session is running inside a Flatpak or Snap container, or if you are on NixOS, the plasmoid will not load correctly due to relative path restrictions.
+</Warning>
+
+## Install
+
+<Steps>
+  <Step title="Fetch the source code">
+    Clone the repository on the `v1` branch and check out the latest release tag:
+
+    ```bash
+    git clone https://github.com/chiyuki0325/lyrica --branch=v1
+    cd lyrica
+    git checkout $(git tag --list "v*" | sort -V | tail -1)
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install the required system packages and Rust toolchain for your distribution:
+
+    <CodeGroup>
+
+    ```bash Debian / Ubuntu
+    sudo apt install \
+      rustup \
+      jq \
+      qt6-declarative-dev \
+      qt6-websockets-dev \
+      qml6-module-qtwebsockets \
+      libdbus-1-dev
+    rustup toolchain install stable
+    ```
+
+    ```bash Arch Linux
+    sudo pacman -S --needed \
+      rustup \
+      qt6-declarative \
+      qt6-websockets \
+      jq
+    rustup toolchain install stable
+    ```
+
+    ```bash Fedora
+    sudo dnf install \
+      rustup \
+      jq \
+      qt6-qtdeclarative \
+      qt6-qtdeclarative-devel \
+      qt6-qtwebsockets \
+      qt6-qtwebsockets-devel \
+      dbus-devel
+    rustup toolchain install stable
+    ```
+
+    ```bash openSUSE
+    sudo zypper install \
+      rustup \
+      jq \
+      qt6-declarative \
+      qt6-websockets \
+      qt6-websockets-imports \
+      dbus-1-devel
+    rustup toolchain install stable
+    ```
+
+    </CodeGroup>
+  </Step>
+
+  <Step title="Build the plasmoid">
+    Run the build script from the repository root. It compiles the Rust daemon and bundles everything into a `.plasmoid` package:
+
+    ```bash
+    bash frontend/build_kde_plasmoid.sh
+    ```
+
+    The script creates a file named `lyrica-plasmoid-<version>-<distro>-<arch>.plasmoid` in the current directory when it finishes.
+  </Step>
+
+  <Step title="Install the plasmoid">
+    Install the `.plasmoid` package using `kpackagetool6`. Replace the filename with the one produced by the build script:
+
+    ```bash
+    kpackagetool6 -i lyrica-plasmoid-<version>-<distro>-<arch>.plasmoid -t Plasma/Applet
+    ```
+
+    After installation, add the **Lyrica** widget to your panel. See [Get started with Lyrica](/quickstart) for instructions.
+  </Step>
+</Steps>
+
+## Upgrade
+
+To upgrade an existing installation, build the new version using the same steps above, then run:
+
+```bash
+kpackagetool6 -u lyrica-plasmoid-<version>-<distro>-<arch>.plasmoid -t Plasma/Applet
+```
+
+The `-u` flag updates the installed package in place. Restart the plasmoid after upgrading by removing it from the panel and adding it again, or by logging out and back in to your KDE session.

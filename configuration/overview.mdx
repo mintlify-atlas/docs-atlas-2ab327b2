@@ -1,0 +1,23 @@
+---
+title: "Lyrica configuration overview"
+description: "An overview of all Lyrica configuration settings, split between appearance options in the widget settings panel and backend lyric search behavior."
+---
+
+Lyrica's configuration is split into two areas: **frontend appearance** and **backend behavior**. Both are accessible from the widget's settings panel in KDE Plasma — right-click the Lyrica widget and select **Configure Lyrica...**. You don't need to edit any files by hand.
+
+<CardGroup cols={2}>
+  <Card title="Appearance" icon="palette" href="/configuration/appearance">
+    Control how lyrics look on your panel: font, text color, character limit, translated lyrics mode, and reconnect text.
+  </Card>
+  <Card title="Backend and lyric search" icon="sliders" href="/configuration/backend">
+    Choose which players Lyrica monitors, which lyric providers to use, and how online search and local file lookup behave.
+  </Card>
+</CardGroup>
+
+## How configuration is applied
+
+After saving settings, right-click the Lyrica widget and select **Reload configuration** to apply the changes. The plasmoid will reconnect to the backend daemon and POST the updated configuration to `http://127.0.0.1:15650/config/update`. Changes take effect for the next song lookup.
+
+<Note>
+  **Appearance settings** (font, color, character limit) are stored per-plasmoid instance. **Backend settings** (players, lyric providers, search options) are shared across all Lyrica widget instances on your desktop.
+</Note>

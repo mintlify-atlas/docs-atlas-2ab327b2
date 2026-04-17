@@ -1,0 +1,211 @@
+---
+title: "Lyrica WebSocket API reference"
+description: "Connect to Lyrica's local WebSocket endpoint to receive real-time lyric and music info events. Full message schema and HTTP config endpoints documented."
+---
+
+Lyrica exposes a local WebSocket API at `ws://127.0.0.1:15650/ws` and HTTP config endpoints. You can use these to build custom display frontends, stream lyrics to external tools, or automate configuration — anything that can open a WebSocket or send an HTTP request can integrate with Lyrica.
+
+## WebSocket endpoint
+
+**URL:** `ws://127.0.0.1:15650/ws`
+
+When you connect, the server immediately pushes two messages with the current state:
+
+1. The current music info (`id=1`)
+2. The current lyric line (`id=0`)
+
+After that, the server streams updates as the song plays and lyric lines advance.
+
+Every message is a JSON object with an `id` field that identifies the message type and a `data` field that carries the payload.
+
+### Message types
+
+| `id` | Name | Description |
+|------|------|-------------|
+| `0` | `UpdateLyricLine` | A new lyric line has started. Sent on every lyric timestamp. |
+| `1` | `UpdateMusicInfo` | The current song has changed. |
+| `2` | `UpdateConfig` | The Lyrica configuration has changed. |
+
+### UpdateLyricLine (id=0)
+
+Sent whenever the current lyric line advances.
+
+```json
+{
+  "id": 0,
+  "data": {
+    "update_lyric_line": {
+      "time": 83450,
+      "text": "Hello world",
+      "alt": "こんにちは世界"
+    }
+  }
+}
+```
+
+<ResponseField name="data.update_lyric_line.time" type="number" required>
+  Timestamp of the lyric line in milliseconds from the start of the track.
+</ResponseField>
+
+<ResponseField name="data.update_lyric_line.text" type="string" required>
+  The current lyric line in its original language.
+</ResponseField>
+
+<ResponseField name="data.update_lyric_line.alt" type="string">
+  A translated or romanized version of the lyric line. `null` if no alternative text is available.
+</ResponseField>
+
+### UpdateMusicInfo (id=1)
+
+Sent when the playing song changes.
+
+```json
+{
+  "id": 1,
+  "data": {
+    "update_music_info": {
+      "title": "Song Title",
+      "artist": "Artist Name"
+    }
+  }
+}
+```
+
+<ResponseField name="data.update_music_info.title" type="string" required>
+  Title of the currently playing song.
+</ResponseField>
+
+<ResponseField name="data.update_music_info.artist" type="string" required>
+  Artist of the currently playing song.
+</ResponseField>
+
+### UpdateConfig (id=2)
+
+Sent when the Lyrica configuration changes. The `data` object contains the full current config, with the same shape as the `GET /config` response.
+
+```json
+{
+  "id": 2,
+  "data": {
+    "update_config": { ... }
+  }
+}
+```
+
+See the [config schema](#config-schema) below for the full field reference.
+
+### Minimal Python client example
+
+```python
+import asyncio
+import websockets
+import json
+
+async def listen():
+    async with websockets.connect("ws://127.0.0.1:15650/ws") as ws:
+        async for raw in ws:
+            msg = json.loads(raw)
+            match msg["id"]:
+                case 0:
+                    line = msg["data"]["update_lyric_line"]
+                    print(f"[{line['time']}ms] {line['text']}")
+                    if line.get("alt"):
+                        print(f"  → {line['alt']}")
+                case 1:
+                    info = msg["data"]["update_music_info"]
+                    print(f"Now playing: {info['artist']} - {info['title']}")
+
+asyncio.run(listen())
+```
+
+## HTTP endpoints
+
+Lyrica also exposes HTTP endpoints for reading and updating configuration.
+
+### GET /config
+
+Returns the current Lyrica configuration as a JSON object.
+
+```bash
+curl http://127.0.0.1:15650/config
+```
+
+Example response:
+
+```json
+{
+  "disabled_players": ["firefox", "chromium", "plasma-browser-integration", "kdeconnect"],
+  "enabled_lyric_providers": ["Mpris2Text", "File", "NeteaseTrackID", "YesPlayMusic", "SPlayer", "FeelUOwnNetease", "Netease"],
+  "online_search_pattern": 0,
+  "disabled_folders": [],
+  "online_search_timeout_secs": 10,
+  "online_search_retry": true,
+  "online_search_max_retries": 3,
+  "lyric_search_folder": "~/Music/lrc"
+}
+```
+
+### POST /config/update
+
+Updates the Lyrica configuration. Send the full config JSON object in the request body. The server applies the new configuration immediately and broadcasts an `UpdateConfig` (id=2) message to all connected WebSocket clients.
+
+```bash
+curl -X POST http://127.0.0.1:15650/config/update \
+  -H "Content-Type: application/json" \
+  -d '{
+    "disabled_players": ["firefox", "chromium"],
+    "enabled_lyric_providers": ["Mpris2Text", "File", "Netease"],
+    "online_search_pattern": 0,
+    "disabled_folders": [],
+    "online_search_timeout_secs": 10,
+    "online_search_retry": true,
+    "online_search_max_retries": 3,
+    "lyric_search_folder": "~/Music/lrc"
+  }'
+```
+
+### GET /test
+
+A simple health check page. Returns a plain response to confirm the daemon is running.
+
+```bash
+curl http://127.0.0.1:15650/test
+```
+
+## Config schema
+
+<ResponseField name="disabled_players" type="string[]" required>
+  List of MPRIS2 player names to ignore. Lyrica will not fetch lyrics for players in this list.
+</ResponseField>
+
+<ResponseField name="enabled_lyric_providers" type="string[]" required>
+  Ordered list of lyric provider names to use. Providers are tried left to right; the first one to return lyrics wins. See [lyric providers](/lyric-providers/overview) for the full list of available provider names.
+</ResponseField>
+
+<ResponseField name="online_search_pattern" type="number" required>
+  Controls the search query pattern used for online lyric lookups. `0` is the default pattern.
+</ResponseField>
+
+<ResponseField name="disabled_folders" type="string[]" required>
+  List of local folder paths to exclude from file-based lyric searches.
+</ResponseField>
+
+<ResponseField name="online_search_timeout_secs" type="number" required>
+  Timeout in seconds for online lyric provider requests.
+</ResponseField>
+
+<ResponseField name="online_search_retry" type="boolean" required>
+  Whether to retry failed online lyric searches.
+</ResponseField>
+
+<ResponseField name="online_search_max_retries" type="number" required>
+  Maximum number of retry attempts for online lyric searches. Only applies when `online_search_retry` is `true`.
+</ResponseField>
+
+<ResponseField name="lyric_search_folder" type="string" required>
+  Local folder path where the `File` provider looks for `.lrc` lyric files. Supports `~` expansion.
+</ResponseField>
+
+<Note>
+  All endpoints bind to `127.0.0.1` only. They are not accessible from other machines on the network.
+</Note>

@@ -1,0 +1,64 @@
+{
+  "projectType": "general",
+  "projectName": "Lyrica",
+  "projectDescription": "A Linux desktop lyrics widget that displays real-time song lyrics on KDE Plasma panels, integrating with music players via MPRIS2 and online lyric sources.",
+  "theme": "willow",
+  "primaryColor": "#7C3AED",
+  "lightColor": "#EDE9FE",
+  "darkColor": "#4C1D95",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Configuration",
+        "pages": [
+          "configuration/overview",
+          "configuration/appearance",
+          "configuration/backend"
+        ]
+      },
+      {
+        "group": "Lyric Providers",
+        "pages": [
+          "lyric-providers/overview",
+          "lyric-providers/file",
+          "lyric-providers/mpris2",
+          "lyric-providers/netease"
+        ]
+      },
+      {
+        "group": "Integrations",
+        "pages": [
+          "integrations/obs-studio",
+          "integrations/websocket-api"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Real-time lyrics display on KDE Plasma panels",
+    "LRC file parsing with millisecond precision",
+    "Multiple lyric providers: local files, MPRIS2 metadata, NetEase Cloud Music",
+    "WebSocket API for custom frontends and integrations",
+    "Support for translated/romanized lyrics (tlyric)",
+    "Configurable text appearance: font size, color, character limit",
+    "OBS Studio integration via Python plugin",
+    "Auto-reconnect on backend restart"
+  ],
+  "publicApiSurface": [
+    "GET /config — Retrieve current configuration",
+    "POST /config/update — Update configuration (JSON body)",
+    "GET /ws — WebSocket endpoint for real-time lyric updates",
+    "WebSocket message id=0: update_lyric_line (text, alt, time)",
+    "WebSocket message id=1: update_music_info (title, artist)",
+    "WebSocket message id=2: update_config",
+    "Lyric providers: Mpris2Text, File, YesPlayMusic, NeteaseTrackID, SPlayer, FeelUOwnNetease, Netease"
+  ]
+}

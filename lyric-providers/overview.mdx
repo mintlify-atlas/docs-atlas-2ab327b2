@@ -1,0 +1,52 @@
+---
+title: "Lyric providers: how Lyrica finds your lyrics"
+description: "Learn how Lyrica's lyric provider chain works, the priority order providers are tried, and how to enable or disable specific providers."
+---
+
+Lyrica uses a chain of lyric providers tried in priority order. When a song plays, each enabled provider is attempted in sequence until one returns lyrics successfully — the remaining providers are skipped. This lets you combine local sources with online fallbacks to get the best coverage across your music library and players.
+
+## Provider priority order
+
+The table below lists all providers in their default priority order, from highest to lowest.
+
+| Priority | Provider | Best for | Notes |
+|----------|----------|----------|-------|
+| 1 | `Mpris2Text` | Players that embed lyrics in MPRIS2 metadata | Cleanest integration; most players don't support this |
+| 2 | `File` | Local music files with embedded tags or LRC files | Works offline; requires matching tags or a `.lrc` file |
+| 3 | `YesPlayMusic` | YesPlayMusic desktop app | Uses YesPlayMusic's local API |
+| 4 | `NeteaseTrackID` | ElectronNCM, NetEase Cloud Music GTK4 | Reads track ID from MPRIS2; no search needed |
+| 5 | `SPlayer` | SPlayer desktop app | Uses SPlayer's local API |
+| 6 | `FeelUOwnNetease` | FeelUOwn + feeluown-netease plugin | For NetEase Cloud Music songs via FeelUOwn |
+| 7 | `Netease` | Any player with clean song metadata | Online fallback; searches NetEase by title + artist |
+
+## How to enable and disable providers
+
+Open the widget settings by right-clicking the Lyrica widget and selecting **Configure Lyrica...**, then go to the **Backend** tab. Find the **Enabled lyric providers** field.
+
+The field holds a comma-separated list of provider names. Providers are tried from left to right, so the order in the list determines their priority:
+
+```text
+Mpris2Text,File,YesPlayMusic,NeteaseTrackID,SPlayer,FeelUOwnNetease,Netease
+```
+
+- **To disable a provider**, remove its name from the list.
+- **To change priority**, reorder the names.
+- **To re-enable a provider**, add its name back in the position you want.
+
+<Note>
+  The provider names used in the configuration field are the exact class names without the `LyricProvider` suffix: `Mpris2Text`, `File`, `YesPlayMusic`, `NeteaseTrackID`, `SPlayer`, `FeelUOwnNetease`, `Netease`. Capitalization matters.
+</Note>
+
+## Provider pages
+
+<CardGroup cols={3}>
+  <Card title="File provider" icon="file-audio" href="/lyric-providers/file">
+    Read lyrics from embedded tags in MP3 and FLAC files, or from `.lrc` files on disk.
+  </Card>
+  <Card title="MPRIS2-based providers" icon="music" href="/lyric-providers/mpris2">
+    Integrate with specific music players via MPRIS2 metadata or local player APIs.
+  </Card>
+  <Card title="Netease provider" icon="cloud" href="/lyric-providers/netease">
+    Search NetEase Cloud Music for lyrics when no player-specific provider succeeds.
+  </Card>
+</CardGroup>

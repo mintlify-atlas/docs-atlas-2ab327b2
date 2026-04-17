@@ -1,0 +1,58 @@
+---
+title: "Lyrica: real-time lyrics on your KDE Plasma panel"
+description: "Lyrica is a Linux desktop lyrics widget that displays synchronized song lyrics on KDE Plasma panels, integrating with MPRIS2 players and online sources."
+---
+
+Lyrica is a Linux desktop lyrics widget that shows synchronized song lyrics directly on your KDE Plasma panel. Unlike floating overlay tools, Lyrica integrates natively into the panel itself — lyrics appear as a first-class panel element alongside your clock, system tray, and other widgets, with no separate window to manage.
+
+## How it works
+
+Lyrica has two main components that work together over a local WebSocket connection:
+
+- **Rust daemon** — a lightweight background service (actix-web + zbus) that connects to your music player over the MPRIS2 D-Bus interface, fetches lyrics from the configured providers, and serves synchronized lyric lines at `ws://127.0.0.1:15650/ws`.
+- **KDE Plasma plasmoid** — a QML widget that connects to the daemon's WebSocket and renders the current lyric line on your panel in real time.
+
+When you add the Lyrica widget to your panel, the plasmoid starts the daemon automatically. From that point on, whenever you play a song in a supported player, lyrics appear on your panel with no manual steps.
+
+## Why Lyrica instead of a floating overlay?
+
+Most desktop lyrics tools display a transparent floating window that sits on top of your other applications. This approach has well-known drawbacks: the window can block content, it doesn't follow your desktop focus, and it breaks when you go fullscreen. Lyrica solves this by living inside the panel:
+
+- Lyrics stay visible without covering application windows.
+- The panel widget respects KDE Plasma's panel rules, stacking order, and multi-monitor setup.
+- You interact with it through the standard KDE widget settings interface.
+
+## What's supported
+
+Lyrica supports the following lyric providers, tried in the order you configure them until one returns lyrics:
+
+| Provider | Source |
+|---|---|
+| `Mpris2Text` | Lyric text embedded in MPRIS2 metadata |
+| `File` | Local `.lrc` files on disk |
+| `YesPlayMusic` | YesPlayMusic desktop app |
+| `NeteaseTrackID` | NetEase Cloud Music by track ID |
+| `SPlayer` | SPlayer desktop app |
+| `FeelUOwnNetease` | feeluown-netease plugin |
+| `Netease` | NetEase Cloud Music by song title search |
+
+**Requirements:**
+
+- KDE Plasma 6.0 or later
+- A supported Linux distribution (see [installation](/installation) for the full list)
+- Any MPRIS2-compatible music player
+
+<Warning>
+  Lyrica does not support Flatpak or Snap desktop environments, or NixOS. These environments impose restrictions on relative paths that prevent the plasmoid from loading correctly. Lyrica is MIT-licensed and open source.
+</Warning>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Build and install Lyrica on Debian, Ubuntu, Arch Linux, Fedora, or openSUSE
+  </Card>
+  <Card title="Lyric providers" icon="music" href="/lyric-providers/overview">
+    Learn how to configure each lyric source and set the fallback order
+  </Card>
+</CardGroup>

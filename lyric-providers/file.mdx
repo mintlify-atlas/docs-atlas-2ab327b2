@@ -1,0 +1,47 @@
+---
+title: "File lyric provider: local LRC and tag support"
+description: "The File provider reads lyrics from embedded tags in MP3 and FLAC files, or from matching .lrc files in your configured lyric search folder."
+---
+
+The `File` provider reads lyrics directly from your local music files, with no internet connection required. It checks for embedded lyrics in the file's tags first, then falls back to looking for a matching `.lrc` file on disk. This makes it the most reliable provider for local music libraries where the files are tagged or accompanied by LRC files.
+
+## Supported formats
+
+| Format | Tag / file type | Field |
+|--------|-----------------|-------|
+| `.mp3` | ID3 tags | `LYRICS` / `USLT` tag |
+| `.flac` | FLAC tags | `LYRICS` tag |
+| `.lrc` | LRC sidecar file | Timed text lines |
+
+<Info>
+  The `File` provider only works when you're playing local music. It won't run for streams or remote sources where there's no file path in the MPRIS2 metadata.
+</Info>
+
+## LRC file lookup
+
+When no embedded lyrics are found in a file's tags, Lyrica looks for a matching `.lrc` file. It searches for a file with the same name as the track (without extension) in your configured `lyricSearchFolder`.
+
+For example, if you're playing `~/Music/Artist/Song.flac` and no embedded lyrics are present, Lyrica looks for a file named `Song.lrc` inside `lyricSearchFolder`.
+
+The default search folder is `~/Music/lrc`. You can change this in the widget settings — see [Backend settings](/configuration/backend) for the `lyricSearchFolder` option.
+
+<Tip>
+  Set `lyricSearchFolder` to your existing LRC collection folder so Lyrica can find lyrics without copying files.
+</Tip>
+
+## LRC file format
+
+Lyrica uses standard LRC format with millisecond timestamps:
+
+```lrc
+[00:01.00] First line of lyrics
+[00:05.50] Second line
+[00:10.23] Third line with translation
+[00:10.23] 翻訳・翻訳されたライン
+```
+
+Each line begins with a timestamp in `[mm:ss.cs]` format followed by the lyric text.
+
+<Note>
+  When two lines share the same timestamp, Lyrica treats the second line as a translation or alternate reading. Both lines are displayed together when that timestamp is active. This is useful for bilingual LRC files where each lyric line is paired with a translated line.
+</Note>

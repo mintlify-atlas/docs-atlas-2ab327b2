@@ -1,0 +1,112 @@
+---
+title: "Backend and lyric search settings"
+description: "Configure which players Lyrica monitors, which lyric providers to enable, online search behavior, and where to look for local LRC files."
+---
+
+The backend settings control which music players Lyrica monitors, how it searches for lyrics, and where it looks for local LRC files. Open them by right-clicking the Lyrica widget and selecting **Configure Lyrica...**, then go to the **Backend** tab.
+
+## Players
+
+<AccordionGroup>
+  <Accordion title="Disabled players" defaultOpen={false}>
+    **Config key:** `disabledPlayers` · **Type:** String (comma-separated) · **Default:** `firefox,chromium,plasma-browser-integration,kdeconnect`
+
+    A comma-separated list of MPRIS2 player names that Lyrica should ignore. This is useful for excluding browsers or phone integrations that expose an MPRIS2 interface but aren't music players you want to display lyrics for.
+
+    Use the short D-Bus service name segment — for example, use `firefox`, not `org.mpris.MediaPlayer2.firefox`.
+
+    ```text
+    firefox,chromium,plasma-browser-integration,kdeconnect
+    ```
+
+    To allow all players, clear this field entirely.
+  </Accordion>
+</AccordionGroup>
+
+## Lyric providers
+
+<AccordionGroup>
+  <Accordion title="Enabled lyric providers" defaultOpen={false}>
+    **Config key:** `enabledLyricProviders` · **Type:** String (comma-separated, ordered) · **Default:** `Mpris2Text,File,YesPlayMusic,NeteaseTrackID,SPlayer,FeelUOwnNetease,Netease`
+
+    A comma-separated, ordered list of lyric providers for Lyrica to use. Providers are tried from left to right; the first one that returns lyrics for the current track wins. Providers not in this list are disabled entirely.
+
+    ```text
+    Mpris2Text,File,YesPlayMusic,NeteaseTrackID,SPlayer,FeelUOwnNetease,Netease
+    ```
+
+    | Provider | Source |
+    |----------|--------|
+    | `Mpris2Text` | Lyric text embedded in MPRIS2 metadata |
+    | `File` | Local `.lrc` files on disk |
+    | `YesPlayMusic` | YesPlayMusic desktop app |
+    | `NeteaseTrackID` | NetEase Cloud Music, looked up by track ID |
+    | `SPlayer` | SPlayer desktop app |
+    | `FeelUOwnNetease` | feeluown-netease plugin |
+    | `Netease` | NetEase Cloud Music, searched by song title |
+
+    Reorder the list to change the lookup priority. Remove a provider name to disable it.
+  </Accordion>
+</AccordionGroup>
+
+## Online search
+
+<AccordionGroup>
+  <Accordion title="Online search pattern" defaultOpen={false}>
+    **Config key:** `onlineSearchPattern` · **Type:** Int · **Default:** `0`
+
+    Controls how Lyrica queries the NetEase Cloud Music API when using the `Netease` provider.
+
+    | Value | Behavior |
+    |-------|----------|
+    | `0` | Search by title + artist (more accurate, default) |
+    | `1` | Search by title only |
+
+    Use `1` if the artist name in your player's metadata causes search mismatches — for example, when the artist name uses a romanization or alternate spelling that NetEase doesn't recognize.
+  </Accordion>
+
+  <Accordion title="Online search timeout" defaultOpen={false}>
+    **Config key:** `onlineSearchTimeout` · **Type:** Int · **Default:** `10`
+
+    The number of seconds to wait for a response from the NetEase Cloud Music API before giving up. Increase this value if you have a slow or unreliable internet connection.
+  </Accordion>
+
+  <Accordion title="Online search retry" defaultOpen={false}>
+    **Config key:** `onlineSearchRetry` · **Type:** Bool · **Default:** `true`
+
+    When enabled, Lyrica retries the online search if the request fails. Disable this if you want Lyrica to fall through to the next provider immediately on failure instead of waiting for retries.
+  </Accordion>
+
+  <Accordion title="Online search max retries" defaultOpen={false}>
+    **Config key:** `onlineSearchMaxRetries` · **Type:** Int · **Default:** `3`
+
+    The maximum number of retry attempts for a failed online search request. Only applies when **Online search retry** is enabled.
+  </Accordion>
+</AccordionGroup>
+
+## Local file search
+
+<AccordionGroup>
+  <Accordion title="Lyric search folder" defaultOpen={false}>
+    **Config key:** `lyricSearchFolder` · **Type:** String · **Default:** `~/Music/lrc`
+
+    The folder Lyrica searches for local `.lrc` lyric files when using the `File` provider. If you leave this blank in the widget settings, it falls back to `~/Music/lrc`.
+
+    Set this to your custom LRC folder if your files are stored elsewhere:
+
+    ```text
+    ~/Documents/lyrics
+    ```
+  </Accordion>
+
+  <Accordion title="Disabled folders" defaultOpen={false}>
+    **Config key:** `disabledFolders` · **Type:** String (newline-separated) · **Default:** _(empty)_
+
+    A newline-separated list of folder paths to skip during file-based lyric lookup. Music in these folders is treated as instrumental — Lyrica won't search for or display lyrics for tracks in these directories. Useful for podcast, audiobook, or ambient music folders in your library.
+
+    ```text
+    ~/Music/podcasts
+    ~/Music/audiobooks
+    ```
+  </Accordion>
+</AccordionGroup>
